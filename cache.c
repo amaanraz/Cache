@@ -126,14 +126,15 @@ void hit_cacheline(const unsigned long long address, Cache *cache){
  */ 
 bool insert_cacheline(const unsigned long long address, Cache *cache) {
   /* YOUR CODE HERE */
-for(int i = 0; i < cache->setBits; i++) {
-    for(int j = 0; j < cache->linesPerSet; i++) {
-      if(cache->sets[i]->bits[j]->valid == true) {
-        cache->sets[i]->bits[j]->access_counter = cache->sets->lru_clock;
-      }
+  Set set =  cache->sets[cache_set(address,cache)];
+  for(int i = 0; i < cache->setBits; i++) {
+    Line line = set.lines[i];
+    if(line.valid) {
+      line.access_counter = cache->sets->lru_clock;
+      return true;
     }
   }
-   return false;
+  return false;
 }
 
 // If there is no empty cacheline, this method figures out which cacheline to replace
