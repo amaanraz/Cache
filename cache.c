@@ -111,7 +111,14 @@ bool probe_cache(const unsigned long long address, const Cache *cache) {
 // Access address in cache. Called only if probe is successful.
 // Update the LRU (least recently used) or LFU (least frequently used) counters.
 void hit_cacheline(const unsigned long long address, Cache *cache){
-  /* YOUR CODE HERE */
+  /* YOUR CODE HERE *
+  Set set =  cache->sets[cache_set(address,cache)];
+  for(int i = 0; i < cache->setBits; i++) {
+    Line line = set.lines[i];
+    if(line.valid && (line.tag = cache_tag(address, cache))) {
+      line.access_counter = cache->sets->lru_clock;
+    }
+  }
  }
 
 /* This function is only called if probe_cache returns false, i.e., the address is
@@ -126,14 +133,6 @@ void hit_cacheline(const unsigned long long address, Cache *cache){
  */ 
 bool insert_cacheline(const unsigned long long address, Cache *cache) {
   /* YOUR CODE HERE */
-  Set set =  cache->sets[cache_set(address,cache)];
-  for(int i = 0; i < cache->setBits; i++) {
-    Line line = set.lines[i];
-    if(line.valid) {
-      line.access_counter = cache->sets->lru_clock;
-      return true;
-    }
-  }
   return false;
 }
 
