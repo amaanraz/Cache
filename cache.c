@@ -196,24 +196,13 @@ void replace_cacheline(const unsigned long long victim_block_addr,
 // Initialize the cache name to the given name 
 void cacheSetUp(Cache *cache, char *name) {
   /* YOUR CODE HERE */
-  // Allocate memory based on set size * line size * unsigned long long
+  // Allocate memory 
+	
+  cache->sets = malloc(sizeof(Set) * pow(2, (cache->setBits)));
 
-  Cache *newCache = malloc((sizeof(pow(2,(cache->setBits))* sizeof(unsigned long long))*(pow(2, (cache->linesPerSet)) *sizeof(unsigned long long))));
-  
-  // Iterate through cache and copy all sets and lines into newCache
-  for(int i = 0; i < cache->setBits; i++) {
-    
-    newCache->sets[i] = cache->sets[i];
-    
-    unsigned long long set_index = i;
-    
-    for(int j = 0; j < cache->linesPerSet; j++) {
-    
-      newCache->sets[set_index].lines[j] = cache->sets[set_index].lines[j];
-    
-    }
+  cache->sets->lines = malloc (sizeof(Line) * pow(2, (cache->linesPerSet)));
 
-  }
+  cache->name = name;
 }
 
 // deallocate the memory space for the cache
