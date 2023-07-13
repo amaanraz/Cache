@@ -200,7 +200,7 @@ void cacheSetUp(Cache *cache, char *name) {
 	
   cache->sets = malloc(sizeof(Set) * pow(2, (cache->setBits)));
 
-  cache->sets->lines = malloc (sizeof(Line) * pow(2, (cache->linesPerSet)));
+  cache->sets->lines = malloc (sizeof(Line) * pow(2, (cache->linesPerSet)) * pow(2, (cache->blockBits)));
 
   cache->name = name;
 }
