@@ -112,13 +112,28 @@ bool probe_cache(const unsigned long long address, const Cache *cache) {
 // Update the LRU (least recently used) or LFU (least frequently used) counters.
 void hit_cacheline(const unsigned long long address, Cache *cache){
   /* YOUR CODE HERE */
-  Set set =  cache->sets[cache_set(address,cache)];
-  for(int i = 0; i < cache->setBits; i++) {
-    Line line = set.lines[i];
-    if(line.valid && (line.tag = cache_tag(address, cache))) {
-      line.access_counter = cache->sets->lru_clock;
+  int i = 0;
+
+  // Get set address with cache set
+  unsigned long long set_address = cache_set(address, cache);
+  
+  // Get tag/block address with cache tag
+  unsigned long long cached_tag = cache_tag(address, cache);
+
+  // Iterate through cache set to find valid tag
+  for(i = 0; i < cache->linesPerSet; i++) {
+    
+    // If tag line is valid, if tag line matches
+    if(cache->sets[set_address].lines[i].valid
+      && (cache->sets[set_address].lines[i].tag == cached_tag)) {
+
+      // Update LFU/access counter & LRU/lru clock
+      cache->sets[set_address].lines[i]->access_counter++;
+      cache->sets[set_address].lines[i]->lru_clock = cache->sets->lru_clock;
+
     }
-  }
+
+  } 
  }
 
 /* This function is only called if probe_cache returns false, i.e., the address is
@@ -153,6 +168,27 @@ unsigned long long victim_cacheline(const unsigned long long address,
 void replace_cacheline(const unsigned long long victim_block_addr,
 		       const unsigned long long insert_addr, Cache *cache) {
   /* YOUR CODE HERE */
+  // Find victim block with cache_tag
+  unsigned long long vic_tag= cache_tag(victim_block_addr, cache);
+
+  // Find insert_block with cache_tag
+  unsigned long long ins_tag = cache_tag(insert_addr, cache);
+
+  // Find insert_set with cache_set
+  unsigned long long ins_set = cache_set(insert_addr, cache);
+  
+  int i = 0;
+
+  // Victim and insert_block share the same set, so iterate through insert_block set and find victim block
+  for(i = 0; i < cache->linesPerSet; i++) {
+    
+    if(cache->sets[ins_set].lines[i].tag == vic_tag) {
+      
+      cache->sets[ins_set].lines[i].tag = ins_tag;
+
+    }
+
+  }
 }
 
 // allocate the memory space for the cache with the given cache parameters
@@ -160,6 +196,24 @@ void replace_cacheline(const unsigned long long victim_block_addr,
 // Initialize the cache name to the given name 
 void cacheSetUp(Cache *cache, char *name) {
   /* YOUR CODE HERE */
+  // Allocate memory based on set size * line size * unsigned long long
+
+  Cache *newCache = malloc((sizeof(pow(2,(cache->setBits))* sizeof(unsigned long long))*(pow(2, (cache->linesPerSet)) *sizeof(unsigned long long))));
+  
+  // Iterate through cache and copy all sets and lines into newCache
+  for(int i = 0; i < cache->setBits; i++) {
+    
+    newCache->sets[i] = cache->sets[i];
+    
+    unsigned long long set_index = i;
+    
+    for(int j = 0; j < cache->linesPerSet; j++) {
+    
+      newCache->sets[set_index].lines[j] = cache->sets[set_index].lines[j];
+    
+    }
+
+  }
 }
 
 // deallocate the memory space for the cache
