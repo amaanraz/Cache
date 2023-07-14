@@ -42,7 +42,44 @@ void print_result(result r) {
  */
 result operateCache(const unsigned long long address, Cache *cache) {
   /* YOUR CODE HERE */
+	
+  // Increment lru clock of cache set
+  unsigned long long set_index = cache_set(address, cache);
+  cache->sets[set_index].lru_clock++;
+  
+  // Initialize result variable
   result r;
+  
+  // Probe cache for appropriate index
+  if(probe_cache(address, cache) == true) {
+      
+      // If probe returns true, hit cacheline, increment hit count and update r status to hit
+      hit_cacheline(address, cache);
+      cache->hit_count++;
+      r.status = CACHE_HIT;
+ 
+  } else {
+    
+    // If probe returns false, find if there is an empty line to insert address
+    if(insert_cacheline(address, cache) == true) {
+      
+      // Increment miss count and update r status to miss
+      cache->miss_count++;
+      r.status = CACHE_MISS;
+
+    } else {
+      
+      // Find a cache line based on LRU or LFU policy 
+      // Replace cache line address
+      replace_cacheline(victim_cacheline(address, cache), address, cache);
+
+      // Update miss and eviction counter and update r status to evict
+      cache->miss_count++;
+      cache->eviction_count++;
+      r.status = CACHE_EVICT;
+
+    } 
+  }
   return r;
 }
 
