@@ -196,13 +196,42 @@ void replace_cacheline(const unsigned long long victim_block_addr,
 // Initialize the cache name to the given name 
 void cacheSetUp(Cache *cache, char *name) {
   /* YOUR CODE HERE */
-  // Allocate memory 
-	
+  int i = 0;
+  int j = 0;
+
+  // Allocating memory space for cache parameters
   cache->sets = malloc(sizeof(Set) * pow(2, (cache->setBits)));
 
   cache->sets->lines = malloc (sizeof(Line) * pow(2, (cache->linesPerSet)) * pow(2, (cache->blockBits)));
 
+  //Initialize cache sets and lines
+  for(i = 0; i < cache->setBits; i++) {
+    
+    unsigned long long set_address = i;
+    // Set global set lru_clock to 0
+    cache->sets[i].lru_clock = 0;
+    
+    for(j = 0; j < cache->linesPerSet; j++) {
+      
+      // Set block address
+      cache->sets[set_address].lines[j].block_addr = j;
+
+      // Set valid boolean value
+      cache->sets[set_address].lines[j].valid = true;
+
+      // Set tag address
+      cache->sets[set_address].lines[j].tag = set_address;
+
+      // Set access counter
+      cache->sets[set_address].lines[j].access_counter = 0;
+    
+    }
+  
+  }
+
+  // Initialize cache name to given name
   cache->name = name;
+
 }
 
 // deallocate the memory space for the cache
