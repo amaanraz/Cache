@@ -202,31 +202,31 @@ void cacheSetUp(Cache *cache, char *name) {
   // Allocating memory space for cache parameters
   cache->sets = malloc(sizeof(Set) * pow(2, (cache->setBits)));
 
-  cache->sets->lines = malloc (sizeof(Line) * pow(2, (cache->linesPerSet)) * pow(2, (cache->blockBits)));
+  // Use a for loop
+  
 
   //Initialize cache sets and lines
-  for(i = 0; i < cache->setBits; i++) {
+  for(i = 0; i < pow(2, (cache->setBits)); i++) {
     
     unsigned long long set_address = i;
+
+    // Allocate memory for lines
+    cache->sets[set_address].lines = malloc(sizeof(Line) * pow(2, (cache->linesPerSet)) * pow(2, (cache->blockBits)));
+    
     // Set global set lru_clock to 0
     cache->sets[i].lru_clock = 0;
     
     for(j = 0; j < cache->linesPerSet; j++) {
-      
-      // Set block address
-      cache->sets[set_address].lines[j].block_addr = j;
 
       // Set valid boolean value
-      cache->sets[set_address].lines[j].valid = true;
-
-      // Set tag address
-      cache->sets[set_address].lines[j].tag = set_address;
-
-      // Set access counter
-      cache->sets[set_address].lines[j].access_counter = 0;
+      cache->sets[set_address].lines[j].valid = false;
     
     }
   
+  }
+
+  // Initialize cache name to given name
+  cache->name = name;
   }
 
   // Initialize cache name to given name
