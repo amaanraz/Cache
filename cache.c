@@ -184,7 +184,26 @@ void hit_cacheline(const unsigned long long address, Cache *cache){
  * Otherwise, it returns false.  
  */ 
 bool insert_cacheline(const unsigned long long address, Cache *cache) {
-  /* YOUR CODE HERE */
+  // Find empty cache block in set
+  unsigned long long setIndex = cache_set(address, cache);
+  Set set = cache->sets[setIndex];
+
+  for(int i = 0; i < cache->linesPerSet; i++){
+    Line l = set.lines[i];
+
+    // empty block
+    if(!l.valid){
+      // Initlize new cache block
+      l.valid = true;
+      l.block_addr = address;
+      l.tag = cache_tag(address,cache);
+      l.lru_clock = set.lru_clock;
+      l.access_counter = 1;
+
+      return true;
+    }
+  }
+  // no space
   return false;
 }
 
