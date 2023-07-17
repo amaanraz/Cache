@@ -233,8 +233,8 @@ unsigned long long victim_cacheline(const unsigned long long address,
   unsigned long long setIndex = cache_set(address,cache);
 
   // assign MAximum Unsigned long long value
-  unsigned long long minLru = INT64_MAX;
-  int minaccess = INT32_MAX;
+  unsigned long long minLru = TMP_MAX;
+  int minaccess = TMP_MAX;
 
   for(int i = 0; i < cache->linesPerSet; i++){
     Line l = cache->sets[setIndex].lines[i];
