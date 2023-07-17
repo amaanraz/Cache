@@ -77,6 +77,7 @@ result operateCache(const unsigned long long address, Cache *cache) {
       
       // Find a cache line based on LRU or LFU policy 
       unsigned long long victimBlockAddress = victim_cacheline(address,cache);
+      // victimBlockAddress = address_to_block(victimBlockAddress,cache);
       // Replace cache line address
       replace_cacheline(victimBlockAddress,address,cache);
 
@@ -177,7 +178,7 @@ void hit_cacheline(const unsigned long long address, Cache *cache){
       // Update LFU/access counter & LRU/lru clock
       if(cache->lfu == 0){
         // Lru
-        cache->sets[set_address].lines[i].lru_clock = cache->sets->lru_clock;
+        cache->sets[set_address].lines[i].lru_clock = cache->sets[set_address].lru_clock;
       } else {
         cache->sets[set_address].lines[i].access_counter++;
       }
@@ -244,16 +245,13 @@ unsigned long long victim_cacheline(const unsigned long long address,
       vict_add = l.block_addr; // Update the victim block address
       minLru = l.lru_clock; // Update the minimum lru_clock
       minaccess = l.access_counter; // Update the minimum access_counter
-    }
-    // else the mins are equal
-    else if(cache->lfu == 1 && l.access_counter == minaccess){
+    } else if(cache->lfu == 1 && l.access_counter == minaccess){
       // use LRU to decide
       if(l.lru_clock < minLru){
         vict_add = l.block_addr;
         minLru = l.lru_clock;
       }
     }
-    
   }
 
   // return address based on LRU or LFU
@@ -277,15 +275,17 @@ void replace_cacheline(const unsigned long long victim_block_addr,
   
   int i = 0;
 
+  Set *set = &(cache->sets[ins_set]);
   // Victim and insert_block share the same set, so iterate through insert_block set and find victim block
   for(i = 0; i < cache->linesPerSet; i++) {
+    Line *line = &(set->lines[i]);
     
-    if(cache->sets[ins_set].lines[i].block_addr == victim_block_addr) {
-      
-      cache->sets[ins_set].lines[i].tag = ins_tag;
-      cache->sets[ins_set].lines[i].block_addr = address_to_block(insert_addr,cache);
-      cache->sets[ins_set].lines[i].lru_clock = cache->sets[ins_set].lru_clock;
-      cache->sets[ins_set].lines[i].access_counter = 1; 
+    if(line->block_addr == victim_block_addr) {
+      line->valid = true;
+      line->tag = ins_tag;
+      line->block_addr = address_to_block(insert_addr,cache);
+      line->lru_clock = set->lru_clock;
+      line->access_counter = 1; 
     }
 
   }
